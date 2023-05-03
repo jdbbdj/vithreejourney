@@ -20,34 +20,40 @@ export default class ThreeModel {
 
         const scene = new THREE.Scene()
 
-        const camera = new THREE.PerspectiveCamera(
-            75,
-            window.innerWidth / window.innerHeight,
-            0.1,
-            1000
-        )
+        //redcube
+        const geometry = new THREE.BoxGeometry(1, 1, 1)
+        //color could be string :"red"; could be hex: ##ff0000; or could be the most accurate a threejs class 0xff00000
+        const material = new THREE.MeshBasicMaterial({ color: 0xff0000 })
+        const mesh = new THREE.Mesh(geometry, material)
+        //shows the box on the screen
+        scene.add(mesh)
+        //but it will not show on this point we need camera
 
+        //CAMERA
+        //one render per one camera
+        //switch camera whenever you want
+        //parameters would be PerspectiveCamera(pov, aspect ratio)
+        //huge pov you can see far left and far right
+        //small pov seeing through a scope but very narrow
+        //aspect ration is the width/height
+        const sizes = {
+            width: 800,
+            height: 600,
+        }
+        const aspect = sizes.width / sizes.height
+        const camera = new THREE.PerspectiveCamera(75, aspect)
+        camera.position.z = 3
+        scene.add(camera)
+
+        //at this point the object will not show still because we need to render it
         const renderer = new THREE.WebGLRenderer()
-        renderer.setSize(window.innerWidth, window.innerHeight)
+        //setsize of renderer
+        renderer.setSize(sizes.width, sizes.height)
+        //finds the canvas
         document.body.appendChild(renderer.domElement)
 
-        const geometry = new THREE.BoxGeometry(1, 1, 1)
-        const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 })
-        const cube = new THREE.Mesh(geometry, material)
-        scene.add(cube)
-
-        camera.position.z = 5
-
-        function animate() {
-            requestAnimationFrame(animate)
-
-            cube.rotation.x += 0.01
-            cube.rotation.y += 0.01
-
-            renderer.render(scene, camera)
-        }
-
-        animate()
+        //renders
+        renderer.render(scene, camera)
     }
 
     resize() {}
