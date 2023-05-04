@@ -380,6 +380,376 @@ object.rotation.reorder('yxz')
 ```
 
 to bypass the default (xyz) order. Do this before changing the rotation
+And for our future reference, we can use this on any fps games where we can rotate the head of the camera rotate left or right which is y, move it up and down which is z, or side by side like pubg which is x or in any order we want
+
+This is an example of gimbal lock
+
+> ![[Pasted image 20230504154442.png]]
+
+
+This is an example of using the order
+
+>![[Pasted image 20230504154518.png]]
+
+***EULER*** is easy to understand but this axis order can be problematic. This is why the most engines and 3D  softwares use ***Quaternion***
+
+### Quaternion
+
+>Quaternion also expresses a rotation, but in a more mathematical way,
+>but remember that the quaternion updates when you change the rotation.
+
+### LookAt method
+
+Object3D instances have a lookAt(...) method which rotates the object so that its `-z` faces the target you provided, The target must be `Vector3`
+
+```
+camera.lookAt(new THREE.Vector3(3, 0, 0))
+
+or we can use the Vector3 position of the object
+
+camera.lookAt(mesh.position)
+
+```
+
+![[Pasted image 20230504160525.png]]
+
+>Note: Always keep in mind that this will not by pass the positioning of the camera if you've given it initial x,y,z position it will just add to the look at movement
+
+![[Pasted image 20230504160638.png]]
+
+### Combining Transformations
+
+- We can combine position, rotation, and scale in any order
+
+## Scene Graph
+
+> Sometimes we will create a house, dogs, gardens and realized that those aren't on the right place and take hours to move it
+
+We can put objects inside groups and use position, rotation, and scale on those groups. To do that, use the `Group` class.
+
+```
+const group = new THREE.Group()
+
+        scene.add(group)
+
+  
+
+        const cube1 = new THREE.Mesh(
+
+            new THREE.BoxGeometry(1, 2, 1),
+
+            new THREE.MeshBasicMaterial({ color: 0xff0000 })
+
+        )
+
+  
+
+        const cube2 = new THREE.Mesh(
+
+            new THREE.BoxGeometry(1, 2, 1),
+
+            new THREE.MeshBasicMaterial({ color: 0xff0000 })
+
+        )
+
+  
+
+        cube2.position.set(3, 3, 2)
+
+  
+
+        const cube3 = new THREE.Mesh(
+
+            new THREE.BoxGeometry(1, 2, 1),
+
+            new THREE.MeshBasicMaterial({ color: 0xff0000 })
+
+        )
+
+  
+
+        cube3.position.set(1, 2, 3)
+
+  
+
+        group.add(cube1)
+
+        group.add(cube2)
+
+        group.add(cube3)
+
+  
+
+        group.position.x = 3
+
+```
+
+
+![[Pasted image 20230504162152.png]]
+
+
+# Animations
+
+- Animating is like doing stop motion
+- Move the object
+- Take a picture
+- Move the object a bit more
+- Take apicture and so on
+
+***Most screens run at 60 frames per seconds, but not always. Your animation must look the same regardless of the framerate***
+
+>***We need to update objects and do a render on each frame. We are going to do that in a function and call this function with window.requestAnimationFrame(...)***
+
+### Request Animation Frame
+
+>The purpose of requestAnimationFrame is to call the function provided on the next frame. We are going to call the same function on each new frame.
+
+```
+
+const tick = () => {
+	console.log('tick')
+	window.requestAnimationFrame(tick)
+}
+
+tick()
+```
+
+following our pattern, we can move the render.render function on the tick function and also the update of position or rotation or scale to call it each time for 60fps remember - Animating is like doing stop motion->Move the object->Take a picture->Move the object a bit more->Take apicture and so on
+
+```
+const tick = () => {
+	console.log('tick')
+	//move the object
+	cube1.rotation.y+=0.03
+	//take a picture
+	renderer.render(scene, camera)
+	window.requestAnimationFrame(tick)
+}
+
+tick()
+```
+
+### Adapt to the framerate
+
+We need to know how much time it's been since the last tick,
+we can use `Date.now()` to get the current timestamp
+
+```
+const tick = () => {
+	//Current Time
+	const time = Date.now()
+	//move the object
+	cube1.rotation.y+=0.03
+	//take a picture
+	renderer.render(scene, camera)
+	window.requestAnimationFrame(tick)
+}
+
+tick()
+```
+
+But doing this we can't get the time elapsed from the past time(outside tick), and the currentTime inside the tick, so we need a time ***basis*** for this to get the time elapsed which we can call `delta`
+
+
+```
+ //this will be the basis time
+
+	let time = Date.now()
+
+        const tick = () => {
+            //Time
+            const currentTime = Date.now()
+            //delta
+            const delta = currentTime-time;
+			//update the time to be the currentTime
+			time=currentTime
+            console.log(delta)
+            //move the object according to delta
+            cube1.rotation.y += 0.01*delta
+            //take a picture
+            renderer.render(scene, camera)
+            window.requestAnimationFrame(tick)
+        }
+
+        tick()
+```
+
+This is a good solution but this will be choppy based on your computer, the animation will align to your framerate.
+
+### Clock method is a built-in solution named Clock
+
+```
+ const clock = new THREE.Clock()
+
+        const tick = () => {
+			const elapsedTime = clock.getElapsedTime()
+            //move the object according to delta
+            cube1.rotation.y = elapsedTime
+            //take a picture
+            renderer.render(scene, camera)
+            window.requestAnimationFrame(tick)
+        }
+
+        tick()
+```
+
+>Note: Clock always starts at 0 and will be in seconds
+
+```
+ const clock = new THREE.Clock()
+
+        const tick = () => {
+			const elapsedTime = clock.getElapsedTime()
+            //move the object according to delta
+            cube1.rotation.y = Math.sin(elapsedTime)
+            //take a picture
+            renderer.render(scene, camera)
+            window.requestAnimationFrame(tick)
+        }
+
+        tick()
+```
+
+We can use the Math.sin() to create a back n forth scenario for rotation and position, the sin function behaves like a wave that has highest positive that comesback to zero and lowest negative that comesback to zero and so on. Also add cos with x property to create a circular motion.
+
+# GSAP Library
+
+>If you want to have more control, create tweens, create timelines, etc. you can use library like `GSAP`
+
+
+GSAP.to(element/object,{properties})
+
+```
+//to on what object that we want to animate
+
+        GSAP.to(cube1.position, {
+            //what properties
+            x: 2,
+            //duration
+            duration: 1,
+            //delay
+            delay: 1,
+        })
+
+//to return the object
+        GSAP.to(cube1.position, {
+            //what properties
+            x: 0,
+            //duration
+            duration: 1,
+            //delay
+            delay: 2,
+        })
+```
+
+>Always watch the delay, if you put the same delay it will run the same time, the same time if you remove the delay it will run at the same time
+
+>GSAP has its own tick and runs its own requestAnimationFrame, knowing this we still need an all running requestAnimationFrame and render.render inside our tick function or it will not run the way we want it to.
+
+# Choosing the right solution:
+No right answer it depends on the project and your preferences.
+
+
+# Cameras
+
+>is an abstract class, you're not supposed to use it directly, An abstract class is a class that cannot be instantiated directly and is typically used as a base class to define a set of common properties and methods that derived classes should implement. In JavaScript, you can create a similar abstraction by defining a constructor function and adding abstract methods to its prototype.
+
+
+```
+
+function Shape() {
+  if (this.constructor === Shape) {
+    throw new Error("Cannot instantiate abstract class");
+  }
+}
+
+Shape.prototype.getArea = function() {
+  throw new Error("Abstract method not implemented");
+};
+
+function Rectangle(width, height) {
+  Shape.call(this); // call super constructor.
+  this.width = width;
+  this.height = height;
+}
+
+Rectangle.prototype = Object.create(Shape.prototype);
+Rectangle.prototype.constructor = Rectangle;
+
+Rectangle.prototype.getArea = function() {
+  return this.width * this.height;
+};
+
+```
+
+
+**This means that it is like Object3D that has inheritance of position, rotation, and scale. You need to call the subclass that inherits those properties, types of cameras are: 
+
+- ***ArrayCamera*** render the scene from multiple cameras on specific areas of render, in example the Crash Bandicoot old camera setup
+-  ***StereoCamera*** render the scene through two cameras that mimic the eyes to create a parallax effect, in example for devices like VR headset, red and blue glasses or cardboard
+- ***CubeCamera*** do 6 renders on all direction of cubes, can render the surrounding for things like environment map, reflection, or shadow map
+- ***OrthographicCamera*** render the scene without perspective, no matter how far the object to the camera the object remains the same. 
+- ***PerspectiveCamera*** render the scene with perspective
+
+>OrthographicCamera and PerspectiveCamera is widely used, especially for isometric point of view
+
+
+## PerspectiveCamera
+
+```
+const camera = new THREE.PerspectiveCamera(
+			//fov
+            75,
+			//aspect ratio
+            window.innerWidth / window.innerHeight,
+			//near
+            0.1,
+			//far
+            1000)
+```
+
+![[Pasted image 20230505005126.png]]
+
+- FOV(Field of view): Vertical vision angle, in degrees, the height covered of the camera: wider FOV produces `distortion` so be careful, you can use scale to avoid zooming or moving the position of the camera `45 and 75 is quiete a lot`
+- Aspect ratio: The width of the render divided by height of the render
+> low aspect ratio on ***observing*** camera could result on this, always keep on practice to get the window size and width and use it for a more proportional point of view of your camera ![[Pasted image 20230505010455.png]]
+- Camera frustum `near` plane. Default is `0.1` how close the camera can see, object `closer` than near `can't be seen`.
+- Camera frustum `far` plane. Default is `1000` how far the camera can see, object `further` than far `can't be seen`.
+
+> Avoid using `0.0001` and `9999999` to prevent `z-fighting`, zfighting is two face on the same location that could result in `glitching`
+> 
+
+
+### CameraHelpers
+
+>this could be effective if you are using two or more camera, in your model. FOV, near, and far could be easily distinguished here. The setup is pretty easy
+
+```
+ const camera = new THREE.PerspectiveCamera(
+            75,
+            window.innerWidth / window.innerHeight,
+            0.1,
+            1000
+        )
+        const camera2 = new THREE.PerspectiveCamera(
+            75,
+            window.innerWidth / window.innerHeight,
+            0.51,
+            0.75
+        )
+        camera2.position.z = 2
+        camera2.rotation.y = Math.PI / 2
+        camera.position.set(0, 0, 5)
+        scene.add(camera2)
+        const helper = new THREE.CameraHelper(camera2)
+        scene.add(helper)
+```
+
+## OrthographicCamera
+
+>differes from the PerspectiveCamera by its `lack of perspective`, objects has the same size regardless of their distance to the camera
+
+
 
 
 
