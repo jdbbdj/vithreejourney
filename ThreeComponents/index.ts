@@ -1,7 +1,8 @@
 import * as THREE from 'three'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader'
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader'
-import { gsap } from 'gsap'
+import GSAP from 'gsap'
+
 //Global UTILS
 
 //assets
@@ -53,20 +54,36 @@ export default class ThreeModel {
         const axesHelper = new THREE.AxesHelper(5)
         scene.add(axesHelper)
 
-        //renders
-        renderer.render(scene, camera)
-
         //animations
 
-        //CLOCK METHOD
-        const clock = new THREE.Clock()
-        const tick = () => {
-            const elapsedTime = clock.getElapsedTime()
+        //GSAP Exploration
 
-            cube1.rotation.y = Math.sin(elapsedTime)
+        //to on what object that we want to animate
+        GSAP.to(cube1.position, {
+            //what properties
+            x: 2,
+            //duration
+            duration: 1,
+            //delay
+            delay: 1,
+        })
+
+        //to return the object
+
+        GSAP.to(cube1.position, {
+            //what properties
+            x: 0,
+            //duration
+            duration: 1,
+            //delay
+            delay: 5,
+        })
+
+        const tick = () => {
+            /* cube1.rotation.y = Math.sin(elapsedTime)
             camera.position.y = Math.sin(elapsedTime)
             camera.position.x = Math.cos(elapsedTime)
-            camera.lookAt(cube1.position)
+            camera.lookAt(cube1.position) */
             //take a picture
             renderer.render(scene, camera)
             window.requestAnimationFrame(tick)
