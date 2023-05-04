@@ -57,17 +57,12 @@ export default class ThreeModel {
 
         //animations
 
-        //this will be the basis time
-        let time = Date.now()
+        //CLOCK METHOD
+        const clock = new THREE.Clock()
         const tick = () => {
-            //Time
-            const currentTime = Date.now()
-            //delta
-            const delta = currentTime - time
-            time = currentTime
-            console.log(delta)
-            //move the object
-            cube1.rotation.y += 0.001 * delta
+            const elapsedTime = clock.getElapsedTime()
+
+            cube1.rotation.y = elapsedTime
             //take a picture
             renderer.render(scene, camera)
             window.requestAnimationFrame(tick)
