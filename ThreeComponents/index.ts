@@ -62,7 +62,10 @@ export default class ThreeModel {
         const tick = () => {
             const elapsedTime = clock.getElapsedTime()
 
-            cube1.rotation.y = elapsedTime
+            cube1.rotation.y = Math.sin(elapsedTime)
+            camera.position.y = Math.sin(elapsedTime)
+            camera.position.x = Math.cos(elapsedTime)
+            camera.lookAt(cube1.position)
             //take a picture
             renderer.render(scene, camera)
             window.requestAnimationFrame(tick)
