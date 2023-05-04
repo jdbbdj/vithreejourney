@@ -35,21 +35,24 @@ export default class ThreeModel {
             0.1,
             1000
         )
-
-        const camera2 = new THREE.PerspectiveCamera(
-            75,
-            window.innerWidth / window.innerHeight,
-            0.51,
-            0.75
+        const aspectRatio = window.innerWidth / window.innerHeight
+        const camera2 = new THREE.OrthographicCamera( //left indicates the negative
+            aspectRatio * -1,
+            //right which is positive
+            aspectRatio * 1, //top
+            (aspectRatio * 1) / 2, //bottom which indicates negative
+            (aspectRatio * -1) / 2,
+            0.1,
+            100
         )
+        camera2.position.z = 100
+        camera2.position.y = 20
         camera2.position.z = 2
-        camera2.rotation.y = Math.PI / 2
-        camera.position.set(0, 0, 5)
-        scene.add(camera2)
+        camera2.lookAt(cube.position)
         const helper = new THREE.CameraHelper(camera2)
         scene.add(helper)
         function animate() {
-            renderer.render(scene, camera)
+            renderer.render(scene, camera2)
             requestAnimationFrame(animate)
         }
 
