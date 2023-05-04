@@ -20,42 +20,13 @@ export default class ThreeModel {
 
         const scene = new THREE.Scene()
 
-        //Groups
-
-        const group = new THREE.Group()
-        scene.add(group)
-
+        //Animations
         const cube1 = new THREE.Mesh(
             new THREE.BoxGeometry(1, 2, 1),
             new THREE.MeshBasicMaterial({ color: 0xff0000 })
         )
 
-        const cube2 = new THREE.Mesh(
-            new THREE.BoxGeometry(1, 2, 1),
-            new THREE.MeshBasicMaterial({ color: 0xff0000 })
-        )
-
-        cube2.position.set(3, 3, 2)
-
-        const cube3 = new THREE.Mesh(
-            new THREE.BoxGeometry(1, 2, 1),
-            new THREE.MeshBasicMaterial({ color: 0xff0000 })
-        )
-
-        cube3.position.set(1, 2, 3)
-
-        group.add(cube1)
-        group.add(cube2)
-        group.add(cube3)
-
-        group.position.x = 3
-        //CAMERA
-        //one render per one camera
-        //switch camera whenever you want
-        //parameters would be PerspectiveCamera(pov, aspect ratio)
-        //huge pov you can see far left and far right
-        //small pov seeing through a scope but very narrow
-        //aspect ration is the width/height
+        scene.add(cube1)
         const sizes = {
             width: 800,
             height: 600,
@@ -64,9 +35,7 @@ export default class ThreeModel {
         //camera position
         const aspect = sizes.width / sizes.height
         const camera = new THREE.PerspectiveCamera(75, aspect)
-        camera.position.z = 10
-        camera.position.x = 1
-        camera.position.y = 1
+        camera.position.z = 3
 
         scene.add(camera)
 
@@ -82,8 +51,22 @@ export default class ThreeModel {
         //axes helper
         const axesHelper = new THREE.AxesHelper(5)
         scene.add(axesHelper)
+
         //renders
         renderer.render(scene, camera)
+
+        //animations
+
+        const tick = () => {
+            console.log('tick')
+            //move the object
+            cube1.rotation.y += 0.03
+            //take a picture
+            renderer.render(scene, camera)
+            window.requestAnimationFrame(tick)
+        }
+
+        tick()
     }
 
     resize() {}
