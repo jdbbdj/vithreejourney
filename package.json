@@ -14,8 +14,10 @@
   },
   "dependencies": {
     "@types/events": "^3.0.0",
+    "@types/greensock": "^1.15.32",
     "@types/three": "^0.151.0",
     "events": "^3.3.0",
+    "gsap": "^3.11.5",
     "three": "^0.152.2"
   }
 }
