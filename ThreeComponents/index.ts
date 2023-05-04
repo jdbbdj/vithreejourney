@@ -26,8 +26,17 @@ export default class ThreeModel {
         const material = new THREE.MeshBasicMaterial({ color: 0xff0000 })
         const mesh = new THREE.Mesh(geometry, material)
         //shows the box on the screen
+        mesh.position.set(1, 2, -3)
+
+        //scale
+        mesh.scale.set(3, 1, 1)
         scene.add(mesh)
         //but it will not show on this point we need camera
+
+        //rotation
+
+        mesh.rotation.y = Math.PI * 0.25
+        mesh.rotation.x = Math.PI * 0.25
 
         //CAMERA
         //one render per one camera
@@ -40,11 +49,26 @@ export default class ThreeModel {
             width: 800,
             height: 600,
         }
+
+        //camera position
         const aspect = sizes.width / sizes.height
         const camera = new THREE.PerspectiveCamera(75, aspect)
         camera.position.z = 3
+        camera.position.x = 1
+        camera.position.y = 1
+
+        //lookAt
+        camera.lookAt(mesh.position)
+        //length of mesh to the center of scene
+        console.log(mesh.position.length())
+
+        //sets the length of the mesh to be 1 no matter what is the position of it
+        /*  mesh.position.normalize()
+        console.log(mesh.position.length()) */
         scene.add(camera)
 
+        //distance
+        console.log(mesh.position.distanceTo(camera.position))
         //at this point the object will not show still because we need to render it
         const renderer = new THREE.WebGLRenderer()
         //setsize of renderer
@@ -52,6 +76,9 @@ export default class ThreeModel {
         //finds the canvas
         document.body.appendChild(renderer.domElement)
 
+        //axes helper
+        const axesHelper = new THREE.AxesHelper(5)
+        scene.add(axesHelper)
         //renders
         renderer.render(scene, camera)
     }
