@@ -45,14 +45,13 @@ export default class ThreeModel {
             0.1,
             100
         )
-        camera2.position.z = 100
-        camera2.position.y = 20
-        camera2.position.z = 2
-        camera2.lookAt(cube.position)
+        camera.position.z = 5
+
+        camera.lookAt(cube.position)
         const helper = new THREE.CameraHelper(camera2)
         scene.add(helper)
         function animate() {
-            renderer.render(scene, camera2)
+            renderer.render(scene, camera)
             requestAnimationFrame(animate)
         }
 
