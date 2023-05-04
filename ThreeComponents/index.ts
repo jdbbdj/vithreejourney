@@ -20,24 +20,35 @@ export default class ThreeModel {
 
         const scene = new THREE.Scene()
 
-        //redcube
-        const geometry = new THREE.BoxGeometry(1, 1, 1)
-        //color could be string :"red"; could be hex: ##ff0000; or could be the most accurate a threejs class 0xff00000
-        const material = new THREE.MeshBasicMaterial({ color: 0xff0000 })
-        const mesh = new THREE.Mesh(geometry, material)
-        //shows the box on the screen
-        mesh.position.set(1, 2, -3)
+        //Groups
 
-        //scale
-        mesh.scale.set(3, 1, 1)
-        scene.add(mesh)
-        //but it will not show on this point we need camera
+        const group = new THREE.Group()
+        scene.add(group)
 
-        //rotation
+        const cube1 = new THREE.Mesh(
+            new THREE.BoxGeometry(1, 2, 1),
+            new THREE.MeshBasicMaterial({ color: 0xff0000 })
+        )
 
-        mesh.rotation.y = Math.PI * 0.25
-        mesh.rotation.x = Math.PI * 0.25
+        const cube2 = new THREE.Mesh(
+            new THREE.BoxGeometry(1, 2, 1),
+            new THREE.MeshBasicMaterial({ color: 0xff0000 })
+        )
 
+        cube2.position.set(3, 3, 2)
+
+        const cube3 = new THREE.Mesh(
+            new THREE.BoxGeometry(1, 2, 1),
+            new THREE.MeshBasicMaterial({ color: 0xff0000 })
+        )
+
+        cube3.position.set(1, 2, 3)
+
+        group.add(cube1)
+        group.add(cube2)
+        group.add(cube3)
+
+        group.position.x = 3
         //CAMERA
         //one render per one camera
         //switch camera whenever you want
@@ -53,22 +64,14 @@ export default class ThreeModel {
         //camera position
         const aspect = sizes.width / sizes.height
         const camera = new THREE.PerspectiveCamera(75, aspect)
-        camera.position.z = 3
+        camera.position.z = 10
         camera.position.x = 1
         camera.position.y = 1
 
-        //lookAt
-        camera.lookAt(mesh.position)
-        //length of mesh to the center of scene
-        console.log(mesh.position.length())
-
-        //sets the length of the mesh to be 1 no matter what is the position of it
-        /*  mesh.position.normalize()
-        console.log(mesh.position.length()) */
         scene.add(camera)
 
         //distance
-        console.log(mesh.position.distanceTo(camera.position))
+
         //at this point the object will not show still because we need to render it
         const renderer = new THREE.WebGLRenderer()
         //setsize of renderer
