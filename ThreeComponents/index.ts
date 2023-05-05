@@ -61,7 +61,11 @@ export default class ThreeModel {
         })
 
         function animate() {
-            camera.position.set(cursor.x * 3, cursor.y * 3, 2)
+            camera.position.set(
+                Math.sin(cursor.x * Math.PI * 2) * 2,
+                cursor.y * 3,
+                Math.cos(cursor.x * Math.PI * 2) * 2
+            )
             camera.lookAt(cube.position)
             renderer.render(scene, camera)
             requestAnimationFrame(animate)
