@@ -46,11 +46,23 @@ export default class ThreeModel {
             100
         )
         camera.position.z = 5
-
-        camera.lookAt(cube.position)
+        camera2.position.z = 5
         const helper = new THREE.CameraHelper(camera2)
         scene.add(helper)
+
+        const cursor = {
+            x: 0,
+            y: 0,
+        }
+        window.addEventListener('mousemove', (e) => {
+            cursor.x = e.clientX / window.innerWidth - 0.5
+            cursor.y = -(e.clientY / window.innerHeight - 0.5)
+            console.log(cursor)
+        })
+
         function animate() {
+            camera.position.set(cursor.x * 3, cursor.y * 3, 2)
+            camera.lookAt(cube.position)
             renderer.render(scene, camera)
             requestAnimationFrame(animate)
         }
