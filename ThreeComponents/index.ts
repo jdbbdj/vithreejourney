@@ -1,7 +1,10 @@
 import * as THREE from 'three'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader'
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader'
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
+import * as dat from 'dat.gui'
 //Global UTILS
+import { gsap } from 'gsap'
 
 //assets
 
@@ -28,17 +31,40 @@ export default class ThreeModel {
         )
 
         const renderer = new THREE.WebGLRenderer()
+        const gui = new dat.GUI({ closed: true })
         renderer.setSize(window.innerWidth, window.innerHeight)
         document.body.appendChild(renderer.domElement)
 
         const geometry = new THREE.BoxGeometry(1, 1, 1)
         const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 })
+
         const cube = new THREE.Mesh(geometry, material)
         scene.add(cube)
 
-        camera.position.z = 5
+        //debug
+        const parameters = {
+            color: 0xff0000,
+            spin: () => {
+                gsap.to(cube.rotation, {
+                    duration: 1,
+                    y: cube.rotation.y + 10,
+                })
+            },
+        }
+        gui.addColor(parameters, 'color').onChange(() => {
+            material.color.set(parameters.color)
+        })
 
+        gui.add(parameters, 'spin')
+        gui.add(cube.position, 'y').min(-3).max(3).step(0.01).name('Elevation')
+        gui.add(material, 'wireframe')
+        gui.add(cube, 'visible')
+
+        camera.position.z = 5
+        const controls = new OrbitControls(camera, canvas)
+        controls.enableDamping = true
         function animate() {
+            controls.update()
             requestAnimationFrame(animate)
 
             renderer.render(scene, camera)
