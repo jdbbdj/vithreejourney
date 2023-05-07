@@ -1,6 +1,9 @@
 import * as THREE from 'three'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader'
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader'
+
+//controls
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 //Global UTILS
 
 //assets
@@ -19,16 +22,28 @@ export default class ThreeModel {
         this.canvas = canvas
 
         const scene = new THREE.Scene()
+        const sizes = {
+            width: window.innerWidth,
+            height: window.innerHeight,
+            aspect: window.innerWidth / window.innerHeight,
+        }
 
-        const camera = new THREE.PerspectiveCamera(
-            75,
-            window.innerWidth / window.innerHeight,
-            0.1,
-            1000
-        )
+        const camera = new THREE.PerspectiveCamera(75, sizes.aspect, 0.1, 1000)
 
+        window.addEventListener('resize', () => {
+            sizes.width = window.innerWidth
+            sizes.height = window.innerHeight
+            camera.aspect = window.innerWidth / window.innerHeight
+            camera.updateProjectionMatrix()
+
+            renderer.setSize(sizes.width, sizes.height)
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
+        })
+
+        const controls = new OrbitControls(camera, canvas)
         const renderer = new THREE.WebGLRenderer()
-        renderer.setSize(window.innerWidth, window.innerHeight)
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
+        renderer.setSize(sizes.width, sizes.height)
         document.body.appendChild(renderer.domElement)
 
         const geometry = new THREE.BoxGeometry(1, 1, 1)
@@ -37,13 +52,18 @@ export default class ThreeModel {
         scene.add(cube)
 
         camera.position.z = 5
-
+        window.addEventListener('dblclick', () => {
+            if (!document.fullscreenElement) {
+                renderer.domElement.requestFullscreen()
+            } else {
+                document.exitFullscreen()
+            }
+        })
+        controls.enableDamping = true
         function animate() {
+            document
+            controls.update()
             requestAnimationFrame(animate)
-
-            cube.rotation.x += 0.01
-            cube.rotation.y += 0.01
-
             renderer.render(scene, camera)
         }
 
