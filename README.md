@@ -1146,5 +1146,281 @@ window.addEventListener('dblclick', () => {
 
 We can't use the canvas for some unknown reason, so we used the renderer.domElement for this and attached its `requestFullScreen` props
 
+# Geometries
+
+### What is geometry?
+
+- Composed of ***vertices*** --- a point coordinates in 3D spaces and ***faces*** ---triangles that join those vertices to create a surface
+- Can be used for meshes but also for particles
+- Can store more data than the positions (UV coordinates, normals, colors )
+
+All the following geometries inherit from ***Geometry***. This class has many built in methods like `translate(. . .)`, `rotate(. . .)`, and `normalize(. . .)`, etc
+
+Built in Geometries:
+- BoxGeometry
+- PlaneGeometry
+- CircleGeometry
+- ConeGeometry
+- CylinderGeometry
+- RingGeometry
+- TorusGeometry
+- TorusKnotGeometry
+- DodecahedronGeometry
+- OctahedronGeometry
+- TetrahedronGeometry
+- IcosahedronGeometry
+- SphereGeometry
+- ShapeGeometry
+- TubeGeometry
+- ExtrudeGeometry
+- LatheGeometry
+- TextGeometry
+
+>One of the reasons we can't dive deep on each of this, because some of those are fixed shape, we can't make it more flexible for specific usages. But by combining them we can create complex shapes. But most of the time we will not do it on our THREEJS project but in our 3D modeling app like ***BLENDER*** and import its output file
+
+## Box Example
+
+Parameters
+- `width`: size on x axis
+- `height`: size on y axis
+- `depth`: size on z axis
+- `widthSegments`: How many subdivisions on the x axis
+- `heightSegments`: How many subdivisions on the y axis
+- `depthSegments`: How many subdivisions on the z axis
+
+Subdivisions correspond to how much triangles should compose a face
+- 1 = 2 triangles per face
+- 2 = 8 triangles per face
+
+```
+const geometry = new THREE.BoxGeometry(1,1,1,2,2,2)
+```
+
+The problem is that we cannot see these triangles, in order for us to see this we can add another props inside the `MeshBasicMaterial` and set it to true
+
+```
+wireframe:true
+```
+
+![[Pasted image 20230507193121.png]]
+
+![[Pasted image 20230507193215.png]]
+
+We can create our own geometry, If the geometry is very complex and specific, we can also use a 3D Software, and attach it to an empty geometry with `Geometry`
+
+```
+ const vertices = [
+	// front
+	{ pos: [-1, -1, 1], norm: [0, 0, 1], uv: [0, 0] },
+	{ pos: [1, -1, 1], norm: [0, 0, 1], uv: [1, 0] },
+	{ pos: [-1, 1, 1], norm: [0, 0, 1], uv: [0, 1] },
+
+]
+
+  
+
+const positions = []
+
+const normals = []
+
+const uvs = []
+
+for (const vertex of vertices) {
+
+	positions.push(...vertex.pos)
+
+	normals.push(...vertex.norm)
+
+	uvs.push(...vertex.uv)
+
+}
+
+  
+
+const geometry2 = new THREE.BufferGeometry()
+
+const positionNumComponents = 3
+
+const normalNumComponents = 3
+
+const uvNumComponents = 2
+
+geometry2.setAttribute(
+
+	'position',
+
+	new THREE.BufferAttribute(
+
+		new Float32Array(positions),
+
+		positionNumComponents
+
+	)
+
+)
+
+geometry2.setAttribute(
+
+	'normal',
+
+	new THREE.BufferAttribute(
+
+		new Float32Array(normals),
+
+		normalNumComponents
+
+	)
+
+)
+
+geometry2.setAttribute('uv',
+new THREE.BufferAttribute(new Float32Array(uvs),uvNumComponents)
+)
+
+  
+
+const material2 = new THREE.MeshBasicMaterial({
+	color: 0x00ff00,
+})
+
+const plane = new THREE.Mesh(geometry2, material2)
+
+scene.add(plane)
+
+```
+
+![[Pasted image 20230507200557.png]]
+
+![[Pasted image 20230507203143.png]]
+
+### THREE.Geometry has been deprecated alongside with Face3, so BufferGeometry becomes the stand in for this gap for custom geometries
+
+> Buffer geoemetries are more efficient and optimized but less developer-friendly, buffer geometries have much more better `performance`
+
+Before creating the geometry, we need to understand how to store buffer geometry data, and we are going to use ***Float32Array***:
+- Typed array
+- Can only store floats
+- Fixed length
+- Easier to handle for the computer
+
+There are `two ways` of creating and filling a ***Float32Array*** 
+```
+const positionArray = new Float32Array(9)
+
+//front
+
+positionArray[0] = 0
+
+positionArray[1] = 0
+
+positionArray[2] = 0
+
+
+
+positionArray[3] = 0
+
+positionArray[4] = 1
+
+positionArray[5] = 0
+
+
+
+positionArray[6] = 1
+
+positionArray[7] = 0
+
+positionArray[8] = 0
+```
+
+other way method is directly insert an array:
+
+```
+const positionArray = new Float32Array([
+0, 0, 0,
+0, 1, 0, 
+0, 0, 0
+])
+```
+
+>It's a one dimention array where the first 3 values are the `x`, `y`, `z` coordinates of the first vertex
+
+>The next 3 values are the `x`, `y`, and `z` of coordinates of the second vertex
+
+
+### BufferAttribute
+
+> We can convert that ***Float32Array*** to be a `BufferAttribute`
+> that corresponds to how much values compose of one vertex
+
+```
+const positionAttribute = new THREE.BufferAttribute(positionsArray,3)
+```
+
+we can finalize it by using setAttribute 
+
+```
+const positionArray = new Float32Array([0, 0, 0, 0, 1, 0, 1, 0, 0])
+
+	//add float32Array to BufferAttribute
+
+	const positionAttribute = new THREE.BufferAttribute(positionArray, 3)
+
+	//add bufferattribute to the buffergeometry
+
+	const geometry = new THREE.BufferGeometry()
+
+	geometry.setAttribute('position', positionAttribute)
+
+        const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 })
+
+	const triangle = new THREE.Mesh(geometry, material)
+
+	scene.add(triangle)
+```
+
+![[Pasted image 20230507210322.png]]
+
+>Make sure to check the orientation of the camera, sometimes you can see the black part of the "back" part of the buffergeometry, if the console didnt give an error try rotating the camera or adjust the position array
+
+```
+const positionArray = new Float32Array([-1, -1, 1, 1, -1, 1, -1, 1, 1])
+```
+
+>`position` is the name that will be used in the shaders
+
+
+### Create random shape for particles
+
+```
+const geometry = new THREE.BufferGeometry()
+//randomizer
+const count = 50
+const positionArray = new Float32Array(count * 3 * 3)
+for (let i = 0; i < count * 3 * 3; i++) {
+	positionArray[i] = Math.random()
+
+}
+const positionAttribute = new THREE.BufferAttribute(positionArray, 3)
+
+geometry.setAttribute('position', positionAttribute)
+
+const material = new THREE.MeshBasicMaterial({
+	color: 0x00ff00,
+	wireframe: true,
+})
+
+const triangle = new THREE.Mesh(geometry, material)
+
+scene.add(triangle)
+```
+
+![[Pasted image 20230507211817.png]]
+
+
+## Index
+
+>Some geometry have faces that share common vertices, when creating a ***BufferGeometry*** we can specify a bunch of vertices and then the indices to create a faces and re-use the vertices multiple times. 
+
+
 
 
