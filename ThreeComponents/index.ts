@@ -46,10 +46,25 @@ export default class ThreeModel {
         renderer.setSize(sizes.width, sizes.height)
         document.body.appendChild(renderer.domElement)
 
-        const geometry = new THREE.BoxGeometry(1, 1, 1)
-        const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 })
-        const cube = new THREE.Mesh(geometry, material)
-        scene.add(cube)
+        /***************BUFFER GEOMETRY****************************/
+        const geometry = new THREE.BufferGeometry()
+        const count = 100
+        const positionArray = new Float32Array(count * 3 * 3)
+
+        for (let i = 0; i < count * 3 * 3; i++) {
+            positionArray[i] = (Math.random() - 0.5) * 3
+        }
+
+        const positionAttribute = new THREE.BufferAttribute(positionArray, 3)
+        geometry.setAttribute('position', positionAttribute)
+
+        const material = new THREE.MeshBasicMaterial({
+            color: 0x00ff00,
+            wireframe: true,
+        })
+        const triangle = new THREE.Mesh(geometry, material)
+        scene.add(triangle)
+        /************END OF BUFFER GEOMETRY*********************** */
 
         camera.position.z = 5
         window.addEventListener('dblclick', () => {
@@ -61,7 +76,6 @@ export default class ThreeModel {
         })
         controls.enableDamping = true
         function animate() {
-            document
             controls.update()
             requestAnimationFrame(animate)
             renderer.render(scene, camera)
