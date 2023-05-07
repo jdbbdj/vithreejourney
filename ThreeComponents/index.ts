@@ -1,6 +1,9 @@
 import * as THREE from 'three'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader'
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader'
+
+//controls
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 //Global UTILS
 
 //assets
@@ -19,16 +22,19 @@ export default class ThreeModel {
         this.canvas = canvas
 
         const scene = new THREE.Scene()
-
+        const sizes = {
+            width: window.innerWidth,
+            height: window.innerHeight,
+        }
         const camera = new THREE.PerspectiveCamera(
             75,
-            window.innerWidth / window.innerHeight,
+            sizes.width / sizes.height,
             0.1,
             1000
         )
-
+        const controls = new OrbitControls(camera, canvas)
         const renderer = new THREE.WebGLRenderer()
-        renderer.setSize(window.innerWidth, window.innerHeight)
+        renderer.setSize(sizes.width, sizes.height)
         document.body.appendChild(renderer.domElement)
 
         const geometry = new THREE.BoxGeometry(1, 1, 1)
@@ -38,12 +44,10 @@ export default class ThreeModel {
 
         camera.position.z = 5
 
+        controls.enableDamping = true
         function animate() {
+            controls.update()
             requestAnimationFrame(animate)
-
-            cube.rotation.x += 0.01
-            cube.rotation.y += 0.01
-
             renderer.render(scene, camera)
         }
 
