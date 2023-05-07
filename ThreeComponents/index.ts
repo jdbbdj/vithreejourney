@@ -1,6 +1,9 @@
 import * as THREE from 'three'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader'
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader'
+
+//CONTROLS
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 //Global UTILS
 
 //assets
@@ -50,7 +53,10 @@ export default class ThreeModel {
         const helper = new THREE.CameraHelper(camera2)
         scene.add(helper)
 
+        const controls = new OrbitControls(camera, canvas)
+        controls.enableDamping = true
         function animate() {
+            controls.update()
             renderer.render(scene, camera)
             requestAnimationFrame(animate)
         }
