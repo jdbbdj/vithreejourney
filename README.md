@@ -951,8 +951,125 @@ function animate() {
 ## Orbit Controls
 
 - Going back on our code, we will just disable the updating of camera inside our animate function.
+- OrbitControls cant be acessed with `THREE.OrbitControls` but by 
+```
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
+const controls = new OrbitControls(camera, canvas)
+```
+- You can also change the perspective of the controls by `target` and `update`
+```
+controls.target.y=1
+controls.update()
+```
 
 
+### Damping
+> but the controls are pretty rough spins fast, stops fast. If we want it to become more smooth we can add what we call `DAMPING`
+
+>The damping will smooth the animation by adding some kind of acceleration and friction, to `enable` the damping , switch the enableDamping property to true.
+
+```
+controls.enableDamping = true
+```
+ But doing this, will not enable the damping yet. We need the controls to update along side with our animate function, so we can insert the `update()` the controls inside the animate function
+```
+controls.enableDamping = true
+
+	function animate() {
+		controls.update()
+		renderer.render(scene, camera)
+		requestAnimationFrame(animate)
+}
+```
+
+When to use ORBIT CONTROLS?
+>Controls are handy, but they have limitations, If you want to use those, make sure that they support all the features that you needed. If not, you'll have to do it on your own
+
+
+
+# Full screen and resizing
+
+### Fit in the viewport
+- To get the viewport width and height, use `window.innerWidth` and `window.innerHeight`
+```
+        const sizes = {
+            width: window.innerWidth,
+            height: window.innerHeight,
+        }
+
+        const camera = new THREE.PerspectiveCamera(
+            75,
+            sizes.width / sizes.height,
+            0.1,
+            1000
+        )
+
+        const renderer = new THREE.WebGLRenderer()
+        renderer.setSize(sizes.width, sizes.height)
+        document.body.appendChild(renderer.domElement)
+```
+
+also make sure to override all default styling on your `root style.css`
+
+```
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+```
+
+to avoid unnecessary contents while you're hovering you can put something on canvas container to be 
+
+```
+
+html,
+body {
+    overflow: hidden;
+}
+
+.canvas-container {
+    position: fixed;
+    width: 100vw;
+    height: 100vh;
+	outline: none;
+}
+
+```
+
+ ***But, upon resize of the window we can get an error which the canvas isn't resizing and you need to refresh for the canvas to resize"
+
+### Handle resizing:
+
+we can use a `native` javascript event listener to check the width on each resize of the screen
+
+```
+window.addEventListener('resize', () => {
+            console.log(window.innerWidth)
+})
+```
+
+We can't listen on the size={width:windows.innerWidth} for it will only return the old screen before resize. We need to call `windows.innerWidth` inside the `eventListener`, so by doing this we can call again the `sizes` object and assign the width, and height on it
+
+
+```
+window.addEventListener('resize', () => {
+
+	sizes.width = window.innerWidth
+	sizes.height = window.innerHeight
+
+	//this is needed for your object to don't distort
+	camera.aspect = window.innerWidth / window.innerHeight
+	camera.updateProjectionMatrix()
+
+  
+	//this will update the canvas and renderer's width and height
+	renderer.setSize(sizes.width, sizes.height)
+
+        })
+```
+
+>Some might see a blurry render and stairs effect on the edges, if so, it's because you are testing on a screen with a pixel ratio greater than `1`
 
 
 
