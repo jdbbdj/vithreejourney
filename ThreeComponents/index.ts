@@ -47,6 +47,51 @@ export default class ThreeModel {
         document.body.appendChild(renderer.domElement)
 
         const geometry = new THREE.BoxGeometry(1, 1, 1, 2, 2, 2)
+        //vertices and create our own geometry
+        const vertices = [
+            // front
+            { pos: [-1, -1, 1], norm: [0, 0, 1], uv: [0, 0] },
+            { pos: [1, -1, 1], norm: [0, 0, 1], uv: [1, 0] },
+            { pos: [-1, 1, 1], norm: [0, 0, 1], uv: [0, 1] },
+        ]
+
+        const positions = []
+        const normals = []
+        const uvs = []
+        for (const vertex of vertices) {
+            positions.push(...vertex.pos)
+            normals.push(...vertex.norm)
+            uvs.push(...vertex.uv)
+        }
+
+        const geometry2 = new THREE.BufferGeometry()
+        const positionNumComponents = 3
+        const normalNumComponents = 3
+        const uvNumComponents = 2
+        geometry2.setAttribute(
+            'position',
+            new THREE.BufferAttribute(
+                new Float32Array(positions),
+                positionNumComponents
+            )
+        )
+        geometry2.setAttribute(
+            'normal',
+            new THREE.BufferAttribute(
+                new Float32Array(normals),
+                normalNumComponents
+            )
+        )
+        geometry2.setAttribute(
+            'uv',
+            new THREE.BufferAttribute(new Float32Array(uvs), uvNumComponents)
+        )
+
+        const material2 = new THREE.MeshBasicMaterial({
+            color: 0x00ff00,
+        })
+        const plane = new THREE.Mesh(geometry2, material2)
+        scene.add(plane)
         const material = new THREE.MeshBasicMaterial({
             color: 0x00ff00,
             wireframe: true,
