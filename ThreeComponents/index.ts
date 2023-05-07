@@ -37,9 +37,11 @@ export default class ThreeModel {
             camera.updateProjectionMatrix()
 
             renderer.setSize(sizes.width, sizes.height)
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
         })
         const controls = new OrbitControls(camera, canvas)
         const renderer = new THREE.WebGLRenderer()
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
         renderer.setSize(sizes.width, sizes.height)
         document.body.appendChild(renderer.domElement)
 
