@@ -25,13 +25,19 @@ export default class ThreeModel {
         const sizes = {
             width: window.innerWidth,
             height: window.innerHeight,
+            aspect: window.innerWidth / window.innerHeight,
         }
-        const camera = new THREE.PerspectiveCamera(
-            75,
-            sizes.width / sizes.height,
-            0.1,
-            1000
-        )
+
+        const camera = new THREE.PerspectiveCamera(75, sizes.aspect, 0.1, 1000)
+
+        window.addEventListener('resize', () => {
+            sizes.width = window.innerWidth
+            sizes.height = window.innerHeight
+            camera.aspect = window.innerWidth / window.innerHeight
+            camera.updateProjectionMatrix()
+
+            renderer.setSize(sizes.width, sizes.height)
+        })
         const controls = new OrbitControls(camera, canvas)
         const renderer = new THREE.WebGLRenderer()
         renderer.setSize(sizes.width, sizes.height)
