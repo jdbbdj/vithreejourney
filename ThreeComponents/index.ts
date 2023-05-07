@@ -39,6 +39,7 @@ export default class ThreeModel {
             renderer.setSize(sizes.width, sizes.height)
             renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
         })
+
         const controls = new OrbitControls(camera, canvas)
         const renderer = new THREE.WebGLRenderer()
         renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
@@ -51,9 +52,16 @@ export default class ThreeModel {
         scene.add(cube)
 
         camera.position.z = 5
-
+        window.addEventListener('dblclick', () => {
+            if (!document.fullscreenElement) {
+                renderer.domElement.requestFullscreen()
+            } else {
+                document.exitFullscreen()
+            }
+        })
         controls.enableDamping = true
         function animate() {
+            document
             controls.update()
             requestAnimationFrame(animate)
             renderer.render(scene, camera)
