@@ -749,6 +749,209 @@ const camera = new THREE.PerspectiveCamera(
 
 >differes from the PerspectiveCamera by its `lack of perspective`, objects has the same size regardless of their distance to the camera
 
+***Instead of field of view, we provide how far the camera can see in each direction(`left`, `right`,`top`, and `bottom`), then the `near` and `far`
+
+```
+		const camera = new THREE.PerspectiveCamera(
+            75,
+            window.innerWidth / window.innerHeight,
+            0.1,
+            1000
+        )
+
+        const camera2 = new THREE.OrthographicCamera(
+	        //left indicates the negative
+			window.innerWidth / -128,
+			//right which is positive
+            window.innerWidth / 256,
+            //top
+            window.innerHeight / 32,
+            //bottom which indicates negative
+            window.innerHeight / -32,
+            0.1,
+            100
+        )
+        camera2.position.z = 2
+        const helper = new THREE.CameraHelper(camera2)
+        scene.add(helper)
+```
+
+![[Pasted image 20230505014353.png]]
+
+We can assign our own numbers on left,right,top,and left but doing so it could result on unwanted result, just like this we change the render.render to see the point of view of orthographic camera we get this result, knowing the box is 1,1,1 it becomes rectangular but why?
+
+```
+const camera2 = new THREE.OrthographicCamera(-1, 1, 1, -1, 0.1, 100)
+        camera2.position.z = 2
+        camera2.position.y = 2
+        camera2.position.z = 2
+        camera2.lookAt(cube.position)
+        const helper = new THREE.CameraHelper(camera2)
+        scene.add(helper)
+```
+
+![[Pasted image 20230505014812.png]]
+
+`Knowing this, we adjusted something earlier, like the aspect ratio that affects how we see things, so there is also a standard for us to don't disturb this.`
+
+```
+const aspectRatio = window.innerWidth / window.innerHeight
+
+const camera2 = new THREE.OrthographicCamera( 
+			//left indicates the negative
+            aspectRatio * -1,
+            //right which is positive
+            aspectRatio * 1, //top
+            (aspectRatio * 1) / 2, 
+            //bottom which indicates negative
+            (aspectRatio * -1) / 2,
+            0.1,
+            100)
+        camera2.position.z = 100
+        camera2.position.y = 20
+        camera2.position.z = 2
+        camera2.lookAt(cube.position)
+        const helper = new THREE.CameraHelper(camera2)
+        scene.add(helper)
+```
+![[Pasted image 20230505020227.png]]
+
+>Keep in mind that this scenario works with the adjustment of camera position and the top,left etc of the OrthographicCamera that's why you can see it as a cube, once you adjust the chrome size it will be `distorted` even if you refresh this. We'll tackle the refresh resize later.
+
+### Custom Controls
+
+>It's hard to move around, we want to control the camera position with the mouse
+
+Doing these needs some steps:
+
+- First we need the mouse coordinates on the page
+>Listen to the mousemove event with `addEventListener` and retrieve the `event.clientX` and `event.clientY`
+
+```
+window.addEventListener('mousemove',(e)=>{
+console.log(e.clientX,e.clientY)
+})
+```
+***the most left is 0 for X, and the most top is 0 for Y, also you don't need to call this inside the animate or the function with requestAnimationFrame and we can improve the code by storing tis values in correspondence with screen's height and width in percentage representation***
+
+```
+const cursor = {
+            x: 0,
+            y: 0,
+            }
+
+        window.addEventListener('mousemove', (e) => {
+            cursor.x = e.clientX/window.innerWidth  - 0.5;
+            cursor.y = e.clientY/ window.innerHeight - 0.5;
+            console.log(cursor);
+            })
+```
+
+
+so if the cursor is on the left most part, and it is divided by the screenWidth it will return a very low value `x` as its percentage close to `-0.5` and the most right is close to `0.5`. The same thing on the height `y`, we can use this on `tweens` and `timeline` with `gsap` for `ease`
+
+- Update the camera ***position*** in the ***animate*** function with the cursor coordinates
+```
+const cursor = {
+            x: 0,
+            y: 0,
+        }
+
+        window.addEventListener('mousemove', (e) => {
+            cursor.x = e.clientX / window.innerWidth - 0.5
+            cursor.y = e.clientY / window.innerHeight - 0.5
+            console.log(cursor)
+        })
+
+        function animate() {
+            camera.position.set(-cursor.x, cursor.y, 2)
+            renderer.render(scene, camera)
+            requestAnimationFrame(animate)
+        }
+```
+
+with this function the box will stick to the center as optical illusion but the real thing  that's happening is you're moving the camera with respect to its percentage, thinking you're moving the box on the screen, we removed the lookAt to override the whole process
+
+```
+const cursor = {
+    x: 0,
+    y: 0,
+}
+
+window.addEventListener('mousemove', (e) => {
+    cursor.x = e.clientX / window.innerWidth - 0.5
+    cursor.y = -(e.clientY / window.innerHeight - 0.5)
+    console.log(cursor)
+})
+
+
+
+function animate() {
+    camera.position.set(cursor.x * 3, cursor.y * 3, 2)
+    camera.lookAt(cube.position)
+    renderer.render(scene, camera)
+    requestAnimationFrame(animate)
+}
+```
+
+we can adjust the negative value of y on the event listener to avoid modifying things on animate function and for consistencies that we can reuse those  values on other part of our code. We can also put multiplier to add some speed on our hover of camera, and return the lookAt after setting the camera position to make sure the box is always on center
+
+## BUT, doing these will just only hover in front of the cube and we can't see its back. So we need our previous thing we've done so far
+
+- Use sin and cosine to create a circular movement
+```
+function animate() {
+
+		camera.position.set(
+			Math.sin(cursor.x * Math.PI * 2) * 2,
+			cursor.y * 3,
+			Math.cos(cursor.x * Math.PI * 2) * 2
+		)
+		camera.lookAt(cube.position)
+		renderer.render(scene, camera)
+		requestAnimationFrame(animate)
+        }
+```
+
+
+# BUILT IN CONTROLS
+
+>ThreeJS has their own built in controls that we can use with similar results after all of these things  we've done
+
+- **Device Orientation Controls**
+
+>This will automatically retrieve the device orientation if your device, OS, and browser allow it and rotate the camera accordingly, Useful in cases to create immersive universes or VR experiences
+
+- Fly Controls
+
+>enable moving the camera like if you were on a spaceship, you canrotate on all 3 axes, go forward and go backward
+
+- First Person Control
+
+>Like a fly controls but cannot change the up axis. Its useful for playing but cannot do barrel roll, got nothing to do with FPS games
+
+- Pointer Lock Controls
+
+>uses the pointer lock javascript API, hard to use and almost only handles the pointer lock and camera rotation, could go forward upward, jump, and can be controllled by key strokes
+
+- Orbit Controls
+>similar to the controls we made with more features
+
+- Transform Controls
+>nothing to do with th camera, move the object
+
+- Drag controls
+> nothing to do the camera, move the object on the plane facing the camera
+
+***We will on ly use Orbit Controls but feel free to test the other classes***
+
+
+
+
+## Orbit Controls
+
+- Going back on our code, we will just disable the updating of camera inside our animate function.
+
 
 
 
