@@ -61,7 +61,6 @@ export default class ThreeModel {
         })
         controls.enableDamping = true
         function animate() {
-            document
             controls.update()
             requestAnimationFrame(animate)
             renderer.render(scene, camera)
