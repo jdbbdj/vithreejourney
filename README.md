@@ -1072,4 +1072,79 @@ window.addEventListener('resize', () => {
 >Some might see a blurry render and stairs effect on the edges, if so, it's because you are testing on a screen with a pixel ratio greater than `1`
 
 
+![[Pasted image 20230507182657.png]]
+
+The pixel ration corresponds on how many physical pixels you have on the screen for one pixel unit on the software part.
+
+- A pixel ratio of 2 means 4 times more pixels to render
+- A pixel ratio of 3 means 9 times more pixels to render
+- Highest pixel ratio are usually on the weakest devices --`mobiles`
+
+![[Pasted image 20230507182903.png]]
+
+To get the current pixel ratio, we can use `window.devicePixelRatio` to update the `renderer` accordingly, we can use `renderer.setPixelRatio(...)`
+
+```
+//use this
+renderer.setPixelRatio(window.devicePixelRatio)
+
+//this is better
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
+```
+
+Also do it on the `resize` event listener in case the user changes the window from a screen to another
+
+```
+window.addEventListener('resize', () => {
+
+	sizes.width = window.innerWidth
+	sizes.height = window.innerHeight
+
+	//this is needed for your object to don't distort
+	camera.aspect = window.innerWidth / window.innerHeight
+	camera.updateProjectionMatrix()
+
+  
+	//this will update the canvas and renderer's width and height
+	renderer.setSize(sizes.width, sizes.height)
+	renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
+
+})
+```
+
+### Handle Fullscreen
+
+>we can set the fullscreen by clicking the maximize button, or resizing, or by simply doubleclicking the window, but we want to handle the maximization by doubleclicking inside our project
+
+```
+window.addEventListener('dblclick', () => {
+	console.log('double click')
+})
+```
+ and enhance it to identify the screen mode of our project currently
+```
+window.addEventListener('dblclick', () => {
+            if (!document.fullscreenElement) {
+                console.log('go fullscreen')
+            } else {
+                console.log('leave fullscreen')
+            }
+})
+```
+
+and do this
+
+```
+window.addEventListener('dblclick', () => {
+            if (!document.fullscreenElement) {
+                renderer.domElement.requestFullscreen()
+            } else {
+                document.exitFullscreen()
+            }
+})
+```
+
+We can't use the canvas for some unknown reason, so we used the renderer.domElement for this and attached its `requestFullScreen` props
+
+
 
